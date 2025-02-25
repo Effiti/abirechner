@@ -1,0 +1,11 @@
+.buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.buttons>* {
+  margin-left: 0 !important;
+  margin-top: 1rem;
+  width: 100%;
+}

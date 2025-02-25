@@ -1,0 +1,99 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hello world!</title>
+
+  <script type="module" src="/src/main.ts"></script>
+</head>
+
+<body>
+  <main class="container" x-data="main">
+    <section>
+      <template x-for="(course, cidx) in courses">
+        <div class="row is-full-width">
+          <div class="col-2 card">
+            <input type="text" maxlength="2" class="col" x-model="courses[cidx].name">
+            <template x-if="!courses[cidx].bll">
+              <span class="is-small col">
+                LK ?
+                <input type="checkbox" x-model.boolean="courses[cidx].lk">
+              </span>
+            </template>
+            <template x-if="courses[cidx].bll">
+              <span class="is-small col is-center">
+                BLL
+              </span>
+            </template>
+            <span class="is-small col">
+              <button @click="courses.splice(cidx, 1)" class="bg-error">
+                <i class="bi bi-x r" style="color: white;"></i>
+              </button>
+            </span>
+          </div>
+          <template x-for="(score, didx) in course.data">
+            <div class="col-2 card is-center">
+              <div class="is-full-width">
+                <template x-if="shouldDisplayDataindex(didx, courses[cidx])">
+                  <input type="number" max="15" min="0" x-model.number="courses[cidx].data[didx]"
+                    class="row is-full-width">
+                </template>
+                <template x-if="didx%2==0&amp;&amp;didx!=4&amp;&amp;!courses[cidx].bll&amp;&amp;!course.lk">
+                  <span class="tag is-small row is-full-width">
+                    Belegt?
+                    <input type="checkbox" :value="didx/2+1" x-model="courses[cidx].yrs">
+                  </span>
+                </template>
+                <template x-if="didx==4&amp;&amp;!course.lk&amp;&amp;!course.bll&amp;&amp;courses[cidx].yrs.length==2">
+                  <span class="tag is-small">
+                    Abitur?
+                    <select x-model.number="courses[cidx].exam">
+                      <option value="0">Nein</option>
+                      <option value="3">3.</option>
+                      <option value="4">4.</option>
+                    </select>
+                  </span>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </section>
+    <section>
+
+      <div class="row is-full-width">
+        <div class="col-4 card is-center">
+          <div class="buttons">
+            <button class="button primary" @click="addCourse()">Kurs hinzufügen</button>
+            <button class="button primary" @click="computeResult(courses)">Ausrechnen</button>
+            <button class="button primary" @click="addBll()">BLL hinzufügen</button>
+          </div>
+        </div>
+        <div class="col-4 card is-center">
+          <p x-text="points">0</p>
+        </div>
+        <div class="col-4 card is-center">
+          <p x-text="avg">6</p>
+        </div>
+      </div>
+
+    </section>
+    <section>
+      <div class="row">
+
+        <span class="tag is-small row is-full-width">
+          Schwerpunkt?
+        </span>
+        <select x-model.number="main_focus">
+          <option value="0">Sprachlich</option>
+          <option value="1">Gesellschaftswissenschaftlich</option>
+          <option value="2">Naturwissenschaftlich</option>
+        </select>
+      </div>
+    </section>
+  </main>
+
+
+</body>
+
+</html>

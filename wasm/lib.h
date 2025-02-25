@@ -1,0 +1,12 @@
+extern unsigned char __heap_base;
+typedef unsigned char u8;
+typedef u8 size_t;
+extern double round(double);
+extern void console_log(char*);
+extern void log_num(unsigned int);
+void *malloc(unsigned long);
+void free(void*);
+char *strcpy(char *restrict dst, const char *restrict src);
+u8 *order_int(const u8 *a, u8 n);
+typedef int (*compar)(const void*,const void*);
+void qsort(void *base, size_t num, size_t size, compar);
