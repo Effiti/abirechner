@@ -1,10 +1,10 @@
 #include "lib.h"
 
-const char* NAMES_NAT = "M\0PH\0CH\0IF\0";
+const char *NAMES_NAT = "M\0PH\0CH\0IF\0";
 
 typedef struct {
-  void* start;
-  void* end;
+  void *start;
+  void *end;
 } Span;
 
 typedef enum { Q1 = (u8)1, Q2 = 2, Q1Q2 = 3, BLL, A3, A4, LK } Type;
@@ -35,6 +35,10 @@ typedef struct {
               // to be null terminated)
 } Course;
 
+typedef struct {
+  Course *ptr;
+  u8 n;
+} Courses;
 // compare a null terminated str, b to a name, a
 u8 namecmp(char *a, char *b) {
   u8 i = 0;
@@ -82,8 +86,8 @@ void log_type(u8 type) {
 // returns an 'added' style u8
 u8 n_max_point_indices(Course course, u8 n) {
   u8 ret = 0;
-  u8* indices = order_int(course.data, LENS[course.type]);
-  for(u8 i = 0; i<=n; i++) {
+  u8 *indices = order_int(course.data, LENS[course.type]);
+  for (u8 i = 0; i <= n; i++) {
     ret |= 1 << (indices[i]);
   }
   return ret;
@@ -98,29 +102,28 @@ u8 required_add(Course course) {
     return 0b00011111;
   if (course.type == A4)
     return 0b00011111;
-  if(namecmp(course.name, "KR") || namecmp(course.name, "ER"))
+  if (namecmp(course.name, "KR") || namecmp(course.name, "ER"))
     return n_max_point_indices(course, 2);
-  if(namecmp(course.name, "D")) 
+  if (namecmp(course.name, "D"))
     return 0b00001111;
-return 0;
+  return 0;
 }
 
-
-
-Span construct_courses(u8 *p) {
-  log_num((int) *p);
+Courses *construct_courses(u8 *p) {
+  log_num((int)*p);
   short total_len = *((unsigned short *)p);
   malloc(total_len + 3);
   p += sizeof(short);
   focus = *p;
   p += sizeof(u8);
-  //console_log("total_len:");
+  console_log("total_len:");
   log_num((int)total_len);
-  Span* span = malloc(sizeof(Span));
+  Courses *header = malloc(sizeof(Courses));
   u8 *ptr = p;
-  span->start = p;
 
+  int i = 0;
   while ((ptr - p) < total_len) {
+    i++;
     Course *course = malloc(sizeof(Course));
     Type type;
 
@@ -128,7 +131,7 @@ Span construct_courses(u8 *p) {
     ptr++;
     course->name = (char *)ptr;
     ptr += 2;
-    console_log((char *)course->name);
+    log_name((char *)course->name);
 
     course->data = ptr;
     course->data_len = LENS[type];
@@ -139,26 +142,40 @@ Span construct_courses(u8 *p) {
     log_num(LENS[type]);
     console_log("...");
   }
+  header->n = i;
 
-  span->end = ptr;
-  return *span;
+  return (header);
 }
 
-void tag_courses(Span span) {
-  u8* ptr = span.start;
-  while((int)ptr-(int)span.end>=0) {
-    
+u8 get_sum(Course tagged) {
+  u8 sum = 0;
+  for (u8 i = 0; i < tagged.data_len; i++) {
+    sum += tagged.data[i];
   }
+  if (tagged.type == LK)
+    return sum * 2;
+  return sum;
+}
+
+void tag_courses(Course *data, u8 n) {
   
 }
 
-unsigned short calculate_from_courses(Span span) {
-  
-  return 0;
-}
+unsigned short calculate_from_courses(Course *courses, u8 n) {
+  unsigned short sum = 0;
+  for (u8 i = 0; i < n; i++) {
+    console_log("sum...");
+    sum += get_sum(courses[i]);
 
+  }
+  return sum +1900;
+}
 
 unsigned short compute(u8 *p) {
-  Span span = construct_courses(p);
-  return calculate_from_courses(span);
+  Courses *course = construct_courses(p);
+  u8 n = course->n;
+  tag_courses(course->ptr, n);;;
+  return calculate_from_courses(course->ptr, n);
+
 }
+

@@ -1,0 +1,4 @@
+{
+  "watch": ["wasm/**/*.c"],
+  "exec": "./start.sh"
+}

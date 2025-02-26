@@ -46,6 +46,7 @@ function make_env(...envs: any) {
   });
 }
 
+
 function log_num(num: number) {
   console.log(num);
 }
