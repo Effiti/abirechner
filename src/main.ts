@@ -137,6 +137,12 @@ const shortToBytes = (short: number) => {
 }
 const compute = (courses: Course[], main_focus: 0 | 1 | 2) => {
   if (typeof wasmInstance === 'undefined') return { points: "WASM konnte nicht geladen werden" };
+
+  //@ts-ignore
+  const wasmMemory = wasmInstance.exports.memory as WebAssembly.Memory;
+  console.log("WASM Memory Size:", wasmMemory.buffer.byteLength);
+
+
   let arr: number[] = [];
   courses.map(serCourse).forEach(
     s => {
@@ -146,18 +152,45 @@ const compute = (courses: Course[], main_focus: 0 | 1 | 2) => {
   );
   let len_bytes = shortToBytes(arr.length);
   arr = [...len_bytes, main_focus, ...arr];
-  const ptr = new Uint8ClampedArray(
-    memory.buffer,
-    0,
-    arr.length
-  );
-  ptr.set(arr);
-  console.log(arr);
+
+  // Allocate memory in WASM
+  const malloc = wasmInstance.exports.malloc as (size: number) => number;
+  const ptr = malloc(arr.length);
+
+  if (!ptr || ptr < 0 || ptr + arr.length > wasmMemory.buffer.byteLength) {
+    throw new Error(`Invalid memory allocation: ptr=${ptr}, requested=${arr.length}, available=${wasmMemory.buffer.byteLength}`);
+  }
+  console.log(-ptr -arr.length +wasmMemory.buffer.byteLength);
+
+  // Copy the array to WASM memory
+  const memoryView = new Uint8ClampedArray(wasmMemory.buffer, ptr, arr.length);
+  memoryView.set(arr);
+
+  console.log("Memory before compute:", memoryView);
+
   //@ts-ignore
   const computed = wasmInstance.exports.compute(ptr);
+
   console.log("computed", computed);
-  console.log("mem", new Uint8ClampedArray(memory.buffer, 0, 100))
+  // //@ts-ignore
+  // const free = wasmInstance.exports.free as (ptr: number) => void;
+  // free(ptr); // Free memory to avoid leaks
+
   return { points: computed };
+  // arr = [...len_bytes, main_focus, ...arr];
+  
+  // const ptr = new Uint8ClampedArray(
+  //   memory.buffer,
+  //   0,
+  //   arr.length
+  // );
+  // ptr.set(arr);
+  // console.log(ptr);
+  // //@ts-ignore
+  // const computed = wasmInstance.exports.compute(ptr);
+  // console.log("computed", computed);
+  // console.log("mem", new Uint8ClampedArray(memory.buffer, 0, 100))
+  // return { points: computed };
 }
 
 function shouldDisplayDataindexForType(didx: number, type: number) {

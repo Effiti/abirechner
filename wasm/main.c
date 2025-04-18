@@ -57,32 +57,6 @@ void log_name(char *name) {
   console_log((char *)n);
 }
 
-void log_type(u8 type) {
-  switch (type) {
-  case 0b001:
-    console_log("Q1");
-    break;
-  case 0b010:
-    console_log("Q2");
-    break;
-  case 0b011:
-    console_log("Q1Q2");
-    break;
-  case 0b100:
-    console_log("BLL");
-    break;
-  case 0b101:
-    console_log("A3");
-    break;
-  case 0b110:
-    console_log("A4");
-    break;
-  case 0b111:
-    console_log("LK");
-    break;
-  }
-}
-
 // returns an 'added' style u8
 u8 n_max_point_indices(Course course, u8 n) {
   u8 ret = 0;
@@ -110,13 +84,12 @@ u8 required_add(Course course) {
 }
 
 Courses *construct_courses(u8 *p) {
-  log_num((int)*p);
+  log_num((unsigned short)*p);
   short total_len = *((unsigned short *)p);
   malloc(total_len + 3);
   p += sizeof(short);
   focus = *p;
   p += sizeof(u8);
-  console_log("total_len:");
   log_num((int)total_len);
   Courses *header = malloc(sizeof(Courses));
   u8 *ptr = p;
@@ -127,20 +100,19 @@ Courses *construct_courses(u8 *p) {
     Course *course = malloc(sizeof(Course));
     Type type;
 
+
     type = *ptr;
     ptr++;
     course->name = (char *)ptr;
     ptr += 2;
-    log_name((char *)course->name);
+    //log_name((char *)course->name);
 
     course->data = ptr;
     course->data_len = LENS[type];
     course->type = type;
     course->added = 0;
     ptr += LENS[type];
-    log_type(type);
     log_num(LENS[type]);
-    console_log("...");
   }
   header->n = i;
 
@@ -149,7 +121,9 @@ Courses *construct_courses(u8 *p) {
 
 u8 get_sum(Course tagged) {
   u8 sum = 0;
+  log_num(tagged.data_len);
   for (u8 i = 0; i < tagged.data_len; i++) {
+    log_num(tagged.data[i]);
     sum += tagged.data[i];
   }
   if (tagged.type == LK)
@@ -164,17 +138,22 @@ void tag_courses(Course *data, u8 n) {
 unsigned short calculate_from_courses(Course *courses, u8 n) {
   unsigned short sum = 0;
   for (u8 i = 0; i < n; i++) {
-    console_log("sum...");
+    log_num(1000+i);
     sum += get_sum(courses[i]);
 
   }
-  return sum +1900;
+  return sum;
 }
 
 unsigned short compute(u8 *p) {
+  for (int i = 0; i<15; i++) {
+      log_num((u8) *(p+i));
+  }
   Courses *course = construct_courses(p);
   u8 n = course->n;
+  log_num(177);
   tag_courses(course->ptr, n);;;
+  drop_all_mem();
   return calculate_from_courses(course->ptr, n);
 
 }

@@ -6,11 +6,30 @@ char *strcpy(char *restrict dst, const char *restrict src) {
     ;
   return --dst;
 }
+
 unsigned int bump_pointer = (unsigned int)&__heap_base;
 void *malloc(unsigned long n) {
   unsigned int r = bump_pointer;
   bump_pointer += n;
   return (void *)r;
+}
+
+void drop_all_mem() {
+  bump_pointer = (unsigned int)&__heap_base;
+}
+
+unsigned long strlen(const char *str) {
+    size_t length = 0;
+    while (*str++) {
+        length++;
+    }
+    return length;
+}
+
+char *h(char*s) {
+  char * ptr = malloc(strlen(s)+1);
+  strcpy(ptr, s);
+  return ptr;
 }
 void free(void *p) {
   // lol

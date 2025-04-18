@@ -7,6 +7,8 @@ extern void log_num(unsigned int);
 void *malloc(unsigned long);
 void free(void*);
 char *strcpy(char *restrict dst, const char *restrict src);
+char *h(char* s);
+void drop_all_mem();
 u8 *order_int(const u8 *a, u8 n);
 typedef int (*compar)(const void*,const void*);
 void qsort(void *base, size_t num, size_t size, compar);
